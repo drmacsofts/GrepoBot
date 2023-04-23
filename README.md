@@ -10,6 +10,7 @@ I'm not responsible if you get banned for using this bot. I personally never got
 ## About The Project
 
 Bot for grepolis written in Python.  
+*This bot only uses requests to communicate with the game so it's entirely possible to run this bot on another server unlike some other bots I have seen for this game made with Selenium.*
 I personally stopped playing grepolis a couple months ago and therefore stopped working on this project and will probably not be updating this.  
 Most of the code is pretty self explanatory.  
 I used the bot for over 2 years and never got banned, even when I was sending 10 support/attack requests in a second to time attacks/destroy enemy colony ships.  

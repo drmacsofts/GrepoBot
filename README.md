@@ -63,7 +63,7 @@ To get a local copy up and running follow these simple steps.
 
 1. Open grepolis and login to your favorite world.
 2. In the top left, the first characters will contain the world name. For example, nl105.  
-![Image of world name](source\images\world_config.jpg)
+![Image of world name](./images/world_config.jpg)
 3. Open the network tab in your browser and filter on XHR.
 4. Click on any request
 5. In the request headers, you will find the CSRF_TOKEN (sid) and H_TOKEN (h_token).
@@ -88,7 +88,7 @@ python main.py
 ```
 
 *Example output running main.py*
-![main](source\images\main_example.png)
+![main](./images/main_example.png)
 
 
 ## **GrepoBot.py**
@@ -97,7 +97,7 @@ By default this will:
 - Check for possible buildings to upgrade and upgrade them if possible
 - Constantly checks the market to see if it's possible to exchange resources for gold. After 3 times you'll have to manually fill in a captcha. The bot will automatically send a message to a discord Webhook to alert the user when a captcha is required.
 - Constantly checks the commands to see if we're getting attacked. If we're getting attacked, it will send a message to a discord Webhook to alert the user. Also possible to automatically dodge an attack (but disabled by default)
-![CommandChecker Alert Example](source\images\example_command_checker.jpg)
+![CommandChecker Alert Example](./images/example_command_checker.jpg)
 
 
 ## **TimeBot.py**
@@ -112,7 +112,7 @@ To time attack or support requests.
 Constantly checks the market to see if it's possible to exchange resources for gold. After 3 times you'll have to manually fill in a captcha. The bot will automatically send a message to a discord Webhook to alert the user when a captcha is required.
 
 I was able to farm around 500-1000 gold a day using this bot on a single world. You'll make a lot of gold combining the farmbot and this goldbot on a newly started world since a lot of players will be asking for resources in the beginning.
-![GoldBot Alert](source\images\example_goldbot.jpg)
+![GoldBot Alert](./images/example_goldbot.jpg)
 
 
 ## Contact

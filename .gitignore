@@ -1,0 +1,7 @@
+debug.log
+/info
+/.vscode
+/json
+/source/__pycache__
+.gitattributes
+.env

@@ -1,0 +1,5 @@
+requests
+dhooks
+termcolor
+dotenv
+colorama

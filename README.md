@@ -102,12 +102,9 @@ By default this will:
 
 ## **TimeBot.py**
 To time attack or support requests. 
-<!-- Link to demo youtube video in markdown-->
-<iframe width="560" height="315" src="https://www.youtube.com/embed/oVjMQ8C0VtY" title="GrepoBot timebot demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+Click the link below to watch a demo on how to time your attack/support.
 
-[![GoldBot demo]
-(https://img.youtube.com/vi/oVjMQ8C0VtY/maxresdefault.jpg)]
-(https://www.youtube.com/watch?v=oVjMQ8C0VtY)
+[TimeBot demo](https://www.youtube.com/watch?v=oVjMQ8C0VtY)
 
 <div id="goldbot"> </div>
 

@@ -32,12 +32,12 @@ headers = {
 
 
 def sent_runtime_request(from_town, to_town):
-    url = f"https://{world}.grepolis.com:443/game/town_info"
+    url = f"https://{world}.grepolis.com/game/town_info"
     params = {
         'town_id': str(from_town),
         'action': 'support',
         'h': h_token,
-        'json': '{"id":%s,"town_id":%s,"nl_init":true}' % (to_town, from_town),
+        'json': '{"id":%s,"town_id":%s}' % (to_town, from_town),
     }
 
     r = requests.get(url, headers=headers,

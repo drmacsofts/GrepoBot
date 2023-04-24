@@ -13,7 +13,6 @@ from config import tokens
 hook = Webhook(tokens.get("discord_hook"))
 
 
-
 class GoldBot:
     def __init__(self, bb_code_town):
         self.H_TOKEN = tokens.get("h_token")
@@ -28,14 +27,17 @@ class GoldBot:
 
     def get_resources_available(self):
         url = f"https://{self.WORLD}.grepolis.com/game/frontend_bridge?town_id={self.TOWN}&action=execute&h={self.H_TOKEN}& \
-        json=%7B%22model_url%22%3A%22PremiumExchange%22%2C%22action_name%22%3A%22read%22%2C%22town_id%22%3A{self.TOWN}%2C%22nl_init%22%3Atrue%7D&_={str(round(time.time(), 3)).replace('.', '')}"
+        json=%7B%22model_url%22%3A%22PremiumExchange%22%2C%22action_name%22%3A%22read%22%2C%22town_id%22%3A{self.TOWN}%2C%22nl_init%22%3Atrue%7D"
 
         #
         data = {
-            'json': f'"model_url":"PremiumExchange","action_name":"read","town_id":{self.TOWN},"nl_init":true'}
+            'json': f'"model_url":"PremiumExchange","action_name":"read","town_id":{self.TOWN}'}
         r = requests.get(url, headers=self.headers,
                          cookies=self.cookies, data=data)
         data = json.loads(r.text)
+
+        if data["json"].get("error") is not None:
+            raise Exception(data["json"]["error"])
 
         wood = data["json"]["wood"]["capacity"] - data["json"]["wood"]["stock"]
         iron = data["json"]["iron"]["capacity"] - data["json"]["iron"]["stock"]
@@ -46,7 +48,7 @@ class GoldBot:
 
     def sell_resources_for_gold(self, resource, resource_amount):
         url = f"https://{self.WORLD}.grepolis.com/game/frontend_bridge?town_id={self.TOWN}&action=execute&h={self.H_TOKEN}"
-        data = {"json": '{"model_url":"PremiumExchange","action_name":"requestOffer","arguments":{"type":"sell","gold":%s,"%s":%s},"town_id":%s,"nl_init":true}' % (
+        data = {"json": '{"model_url":"PremiumExchange","action_name":"requestOffer","arguments":{"type":"sell","gold":%s,"%s":%s},"town_id":%s}' % (
             "100", resource, resource_amount, self.TOWN)}
         r = requests.post(url, headers=self.headers,
                           cookies=self.cookies, data=data)
@@ -70,7 +72,7 @@ class GoldBot:
     def confirm_offer(self, gold, mac, resource_type, resource_amount):
         url = f"https://{self.WORLD}.grepolis.com/game/frontend_bridge?town_id={self.TOWN}&action=execute&h={self.H_TOKEN}"
 
-        data = {"json": '{"model_url":"PremiumExchange","action_name":"confirmOffer","arguments":{"type":"sell","gold":%s,"mac":"%s","offer_source":"main","%s":%s},"town_id":%s,"nl_init":true}' % (
+        data = {"json": '{"model_url":"PremiumExchange","action_name":"confirmOffer","arguments":{"type":"sell","gold":%s,"mac":"%s","offer_source":"main","%s":%s},"town_id":%s}' % (
             gold, mac, resource_type, resource_amount, self.TOWN)}
 
         r = requests.post(url, headers=self.headers,
@@ -82,11 +84,12 @@ class GoldBot:
 
     def full_trade_cycle(self):
         wood, iron, stone = self.get_resources_available()
-        
+
         if wood < 300 and iron < 300 and stone < 300:
-            print(f"[GOLDBOT] [{self.TOWN}] -> [wood: {wood}, iron: {iron}, stone: {stone}]")
+            print(
+                f"[GOLDBOT] [{self.TOWN}] -> [wood: {wood}, iron: {iron}, stone: {stone}]")
             return
-        
+
         for resource_type in ["wood", "iron", "stone"]:
             print(f"[GOLDBOT] [{self.TOWN}] -> Requesting {resource_type}")
             r = self.sell_resources_for_gold(resource_type, 2000)
@@ -116,7 +119,6 @@ class GoldBot:
             else:
                 print(f"Unable to because gold offer: {gold}")
 
-
     def run_bot(self):
 
         while True:
@@ -131,7 +133,7 @@ class GoldBot:
 
 
 def main():
-    gold_bot = GoldBot(4970)
+    gold_bot = GoldBot(11357)
 
     gold_bot.run_bot()
 

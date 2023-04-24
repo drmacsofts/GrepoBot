@@ -28,7 +28,7 @@ class TimeBot():
         print(f"Trying to send: {units} from {source_id} to {destination_id}")
         url = f"https://{self.world}.grepolis.com/game/town_info?action=send_units&h={self.h_token}"
 
-        data = {"json": '{%s,"id":"%s","type":"%s","town_id":%s,"nl_init":true}' %
+        data = {"json": '{%s,"id":"%s","type":"%s","town_id":%s}' %
                 (units, destination_id, _type, source_id)}
 
         r = requests.post(url, headers=self.headers,
@@ -56,7 +56,7 @@ class TimeBot():
     def cancel_command(self, id_to_cancel, source_town_id):
         print("Cancelling")
         url = f"https://{self.world}.grepolis.com/game/town_overviews?town_id={source_town_id}&action=cancel_command&h={self.h_token}"
-        data = {"json": '{"id\":"%s\","town_id":%s,"nl_init":true}' %
+        data = {"json": '{"id\":"%s\","town_id":%s}' %
                 (id_to_cancel, source_town_id)}
 
         requests.post(url, headers=self.headers,
@@ -94,7 +94,7 @@ class TimeBot():
                     response_data)
             except KeyError:
                 print("Units aren't back yet - sleep 0.1 sec")
-                time.sleep(0.1)  
+                time.sleep(0.1)
                 continue
             gewenste_arival = time_to_epoch(hour, minute, second)
             print(f"Desired Arrival: {epoch_to_time(gewenste_arival)}")
@@ -106,24 +106,21 @@ class TimeBot():
             if resp_calc == True or resp_calc == False:  # ! huh wtf is dit
                 break
 
-
-
     def generate_units_str_to_send(self, units_dict, units_list: list = [], percentage=100):
         return_str = ""
         if len(units_list) == 0:
             if percentage != 100:
                 for unit, amount in units_dict.items():
                     units_dict[unit] = int(amount * percentage / 100)
-            
+
             for unit, amount in units_dict.items():
                 return_str += f'"{unit}":{amount},'
-            
+
             return return_str[:-1]
 
-            
         else:
             units_to_send = {key: value for key,
-                            value in units_dict.items() if key in units_list}
+                             value in units_dict.items() if key in units_list}
 
             if percentage != 100:
                 for unit, amount in units_to_send.items():
@@ -135,16 +132,17 @@ class TimeBot():
             return return_str[:-1]
 
     def main(self):
-        city_1 = City(7610) # BBcode of your city
-        units = city_1.get_all_units() # Getting available units
+        city_1 = City(11357)  # BBcode of your city
+        units = city_1.get_all_units()  # Getting available units
 
         print(units)
 
         # Generating units to send, give a list of units you want to send, in my case i only want to send slingers
-        units_to_send = self.generate_units_str_to_send(units, ["slinger"]) 
+        units_to_send = self.generate_units_str_to_send(units, ["slinger"])
 
         # support/attack                    #City to attack, #hour, minute, second desired arrival
-        self.time_bot("support", city_1._id, 7613, 16, 21, 40, units_to_send, max_difference=1)
+        self.time_bot("support", city_1._id, 11368, 16, 21,
+                      40, units_to_send, max_difference=1)
         # Set max difference to 0 if you want to only send units when they arrive at the exact time, otherwise it will cancel the command and try again
         # Understand that the lower the max difference, the more likely your units will never be sent
         # a max_difference of 3 should be successful 90% of the time

@@ -1,3 +1,5 @@
+import threading
+from timeBot import TimeBot
 import requests
 import time
 from datetime import datetime
@@ -7,9 +9,6 @@ from city import City
 from functions import epoch_to_time, time_to_epoch
 hook = Webhook(tokens.get("discord_hook"))
 
-from city import City
-from timeBot import TimeBot
-import threading
 
 class CommandOverview():
     def __init__(self, town_id) -> None:
@@ -29,8 +28,15 @@ class CommandOverview():
     def get_commands(self):
         url = f"https://{self.world}.grepolis.com/game/town_overviews?town_id={self.town_id}&action=command_overview&h={self.h_token}"
 
-        r = requests.get(url, headers=self.headers,  cookies=self.cookies)
-        return r.json()["json"]["data"]["commands"]
+        r = requests.get(url, headers=self.headers,  cookies=self.cookies).json()
+
+
+        
+        if r["json"].get("error") is not None:
+            raise Exception(r["json"]["error"])
+        
+        return r["json"]["data"]["commands"]
+    
     
 
     def get_attack_commands(self):
@@ -58,7 +64,8 @@ class CommandOverview():
         If you want to automatically dodge an attack, you can use this function, just uncomment it in the process_commands function.
         '''
 
-        print(f"[ATTACK DODGER] [{city_getting_attacked}] -> Militie oroepen...")
+        print(
+            f"[ATTACK DODGER] [{city_getting_attacked}] -> Militie oroepen...")
         self.oproepen_militie(city_getting_attacked)
 
         city = City(city_getting_attacked)
@@ -68,22 +75,24 @@ class CommandOverview():
         sea_units = TimeBot().generate_units_str_to_send(sea_units)
         lands_units = TimeBot().generate_units_str_to_send(lands_units)
 
-
         while True:
             print(f"[ATTACK DODGER] [{city_getting_attacked}] -> Attack is coming in {round(when_to_dodge - datetime.now().timestamp(), 2)} seconds, sending units away when it's 20 seconds before arrival ")
             if datetime.now().timestamp() > when_to_dodge - 300:
-                destination_town_id = City.get_random_town_from_island(city, city_getting_attacked)
-                print(f"[ATTACK DODGER] [{city_getting_attacked}] Sending units to {destination_town_id} to dodge attack")
-                resp = TimeBot().send_units(city_getting_attacked, destination_town_id, lands_units, _type="support")
+                destination_town_id = City.get_random_town_from_island(
+                    city, city_getting_attacked)
+                print(
+                    f"[ATTACK DODGER] [{city_getting_attacked}] Sending units to {destination_town_id} to dodge attack")
+                resp = TimeBot().send_units(city_getting_attacked,
+                                            destination_town_id, lands_units, _type="support")
                 arrival_at, command_id_land = TimeBot().process_send_units_response(resp)
-                
+
                 time.sleep(20)
                 TimeBot().cancel_command(command_id_land, city_getting_attacked)
-                print(f"[ATTACK DODGER] [{city_getting_attacked}] -> Cancelled support to {destination_town_id} Successfully Dodged Attack")
+                print(
+                    f"[ATTACK DODGER] [{city_getting_attacked}] -> Cancelled support to {destination_town_id} Successfully Dodged Attack")
                 break
             else:
                 time.sleep(1)
-
 
     def process_commands(self, command_list):
         if len(command_list) == 0:
@@ -91,7 +100,7 @@ class CommandOverview():
             output = f'[{current_time}] [TOWN {self.town_id}] [CommandChecker] -> No Commands'
             print(output)
             return
-        
+
         for command in command_list:
             if command["id"] not in self.already_seen:
                 self.already_seen.append(command["id"])
@@ -115,7 +124,6 @@ class CommandOverview():
                     # thread = threading.Thread(target=self.dodge_attack, args=(destination_town_id, origin_town_id, arrival_at))
                     # thread.start()
 
-
             else:
                 output = f"[{datetime.now().strftime('%H:%M:%S')}] [TOWN {self.town_id}] [CommandChecker] -> No new Commands"
                 print(output)
@@ -128,7 +136,7 @@ class CommandOverview():
 
 
 def main():
-    command_overview = CommandOverview(4970)
+    command_overview = CommandOverview(11357)
     command_overview.main()
 
 

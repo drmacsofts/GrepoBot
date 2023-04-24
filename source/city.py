@@ -71,15 +71,14 @@ class City():
         """
         farm_towns = []
         island_id = self.get_island()
-        url = f"https://{self.world}.grepolis.com:443/game/island_info?town_id={self.town_id}&action=index&h={self.h_token}"
+        url = f"https://{self.world}.grepolis.com/game/island_info?town_id={self.town_id}&action=index&h={self.h_token}"
         params = {
-            'json': '{"island_id": %d,"town_id":%d,"nl_init":true}' % (island_id, self.town_id)
+            'json': '{"island_id": %d,"town_id":%d}' % (island_id, self.town_id)
         }
         data = requests.get(url, params=params, headers=self.headers,
                             cookies=self.cookies).json()["json"]["json"]
         farm_town_list = data["farm_town_list"]
-        farm_towns = [int(farm_town["id"]) for farm_town in farm_town_list if len(
-            farm_town["lootable_human"]) > 0]
+        farm_towns = [int(farm_town["id"]) for farm_town in farm_town_list if farm_town["rel"] >= 1]
         self.farms = farm_towns
         return farm_towns
     
@@ -88,13 +87,18 @@ class City():
         Returns town_id of a random town on the island of the current city, to use for dodging
         """
         island_id = self.get_island()
-        url = f"https://{self.world}.grepolis.com:443/game/island_info?town_id={town_id}&action=index&h={self.h_token}"
+        url = f"https://{self.world}.grepolis.com/game/island_info?town_id={town_id}&action=index&h={self.h_token}"
         params = {
-            'json': '{"island_id": %d,"town_id":%d,"nl_init":true}' % (island_id, town_id)
+            'json': '{"island_id": %d,"town_id":%d}' % (island_id, town_id)
         }
         data = requests.get(url, params=params, headers=self.headers,
-                            cookies=self.cookies).json()["json"]["json"]
-        towns = data["town_list"]
+                            cookies=self.cookies).json()
+        
+        if data["json"].get("error") is not None:
+            raise Exception(data["json"]["error"])
+
+        
+        towns = data["json"]["json"]["town_list"]
         
         return random.choice(towns)["id"]
 
@@ -102,12 +106,23 @@ class City():
         """
         Returns the island ID of the current city
         """
-        url = f'https://{self.world}.grepolis.com/game/town_info?town_id={self.town_id}&action=info&h={self.h_token}&json=%7B%22id%22%3A{self.town_id}%2C%22town_id%22%3A{self.town_id}%2C%22nl_init%22%3Atrue%7D'
+        url = f'https://{self.world}.grepolis.com/game/town_info'
+
+        params = {
+            'town_id': self.town_id,
+            'action': 'info',
+            'h': self.h_token,
+            'json': '{"id": %s,"town_id":%s} ' % (self.town_id, self.town_id),
+        }
+
 
         data = requests.get(url, headers=self.headers,
-                            cookies=self.cookies).json()
-        island_id = int(data["plain"]["html"].split(
-            "Eiland")[1].split("<")[0].strip(" "))
+                            cookies=self.cookies, params=params).json()
+        
+        if data["json"].get("error") is not None:
+            raise Exception(data["json"]["error"])
+                
+        island_id = int(data["plain"]["html"].split("gp_island_link")[1].split("<")[0].split(" ")[1])        
         self.island_id = island_id
         return island_id
 
@@ -120,7 +135,7 @@ class City():
             "normal_buildings": {},
             "queue_full": False
         }
-        url = f"https://{self.world}.grepolis.com:443/game/building_main?town_id={self.town_id}&action=index&h={self.h_token}&json=%7B%22town_id%22%3A{self.town_id}%2C%22"
+        url = f"https://{self.world}.grepolis.com/game/building_main?town_id={self.town_id}&action=index&h={self.h_token}&json=%7B%22town_id%22%3A{self.town_id}%2C%22"
 
         json_data = requests.get(url, headers=self.headers,
                                  cookies=self.cookies).json()["json"]
@@ -226,7 +241,7 @@ class City():
         """ Upgrade a building """
         url = f"https://{self.world}.grepolis.com/game/frontend_bridge?town_id={self.town_id}&action=execute&h={self.h_token}"
         data = {
-            'json': '{"model_url":"BuildingOrder","action_name":"buildUp","arguments":{"building_id":"%s"},"town_id":%s,"nl_init":true}' % (building, self.town_id)
+            'json': '{"model_url":"BuildingOrder","action_name":"buildUp","arguments":{"building_id":"%s"},"town_id":%s}' % (building, self.town_id)
         }
 
         response = requests.post(
@@ -244,7 +259,7 @@ class City():
             f"Trying to send: {units} from {self.town_id} to {destination_id}")
         url = f"https://{self.world}.grepolis.com/game/town_info?town_ids={self.town_id}&action=send_units&h={self.h_token}"
 
-        data = {"json": '{%s,"id":"%s","type":"%s","town_id":%s,"nl_init":true}' %
+        data = {"json": '{%s,"id":"%s","type":"%s","town_id":%s}' %
                 (units, destination_id, _type, self.town_id)}
 
         r = requests.post(url, headers=self.headers,
@@ -270,8 +285,6 @@ class City():
                 if r["json"]["error"]:
                     output = f"[{current_time}] [TOWN {self.town_id}] [CityBuilder] -> {r['json']['error']}"
                     print(colored(output, "red"))
-                    if r["json"]["error"] == "De bouwwachtrij is vol." or r["json"]["error"] == "Je hebt te weinig bevolking om het gebouw uit te breiden.":
-                        return
 
             except KeyError:
                 output = f"[{current_time}] [TOWN {self.town_id}] [{self.town_type}] [CityBuilder] -> Succesfully upgraded {building}"
@@ -279,6 +292,5 @@ class City():
 
 
 if __name__ == "__main__":
-    city = City(6478, 1111)
-    City.get_random_town_from_island(city, town_id=6478)
+    city = City(11357)
     print(city.farm_all_villages())

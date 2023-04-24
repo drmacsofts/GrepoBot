@@ -1,5 +1,5 @@
 requests
 dhooks
 termcolor
-dotenv
+python-dotenv
 colorama

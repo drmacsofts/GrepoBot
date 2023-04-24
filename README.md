@@ -37,6 +37,7 @@ To get a local copy up and running follow these simple steps.
 ### Prerequisites
 
 - Version of Python greater than 3.6
+- You need the Administrator in Grepolis ! (You can easily get the gold to buy him using the goldbot)
 
 ### Installation
 

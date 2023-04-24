@@ -9,7 +9,6 @@ from config import tokens
 colorama.init()
 
 
-
 class City():
     def __init__(self, town_id: int, farms=[], town_type="default"):
         self.town_id = town_id
@@ -78,10 +77,11 @@ class City():
         data = requests.get(url, params=params, headers=self.headers,
                             cookies=self.cookies).json()["json"]["json"]
         farm_town_list = data["farm_town_list"]
-        farm_towns = [int(farm_town["id"]) for farm_town in farm_town_list if farm_town["rel"] >= 1]
+        farm_towns = [int(farm_town["id"])
+                      for farm_town in farm_town_list if farm_town["rel"] >= 1]
         self.farms = farm_towns
         return farm_towns
-    
+
     def get_random_town_from_island(self, town_id) -> int:
         """
         Returns town_id of a random town on the island of the current city, to use for dodging
@@ -93,13 +93,12 @@ class City():
         }
         data = requests.get(url, params=params, headers=self.headers,
                             cookies=self.cookies).json()
-        
+
         if data["json"].get("error") is not None:
             raise Exception(data["json"]["error"])
 
-        
         towns = data["json"]["json"]["town_list"]
-        
+
         return random.choice(towns)["id"]
 
     def get_island(self) -> int:
@@ -115,14 +114,17 @@ class City():
             'json': '{"id": %s,"town_id":%s} ' % (self.town_id, self.town_id),
         }
 
-
         data = requests.get(url, headers=self.headers,
                             cookies=self.cookies, params=params).json()
-        
+
         if data["json"].get("error") is not None:
             raise Exception(data["json"]["error"])
-                
-        island_id = int(data["plain"]["html"].split("gp_island_link")[1].split("<")[0].split(" ")[1])        
+        
+        if data["json"].get("redirect") is not None:
+            raise Exception("[ERROR] Are u sure the csrf and h_token are correct?")
+
+        island_id = int(data["plain"]["html"].split(
+            "gp_island_link")[1].split("<")[0].split(" ")[1])
         self.island_id = island_id
         return island_id
 
@@ -162,7 +164,6 @@ class City():
 
         return return_dict
 
-    
     def farm_village(self, village_id, option=1) -> None:
         """ 
         Getting the resources from one village (option 1-4) where 1 is a 5/10 minutes collection(aka first option) and 4 is the longest aka last option.

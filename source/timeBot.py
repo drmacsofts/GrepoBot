@@ -25,7 +25,7 @@ class TimeBot():
             units: units to send
             _type: "support" | "attack"
         """
-        print(f"Trying to send: {units} from {source_id} to {destination_id}")
+        print(f"Sending: {units} from {source_id} to {destination_id}")
         url = f"https://{self.world}.grepolis.com/game/town_info?action=send_units&h={self.h_token}"
 
         data = {"json": '{%s,"id":"%s","type":"%s","town_id":%s}' %
@@ -37,12 +37,22 @@ class TimeBot():
         return json.loads(r.text)
 
     def process_send_units_response(self, data, command_type="support"):
-        notifs = data["json"]["notifications"]
+        if data["json"].get("success") is not None:
+            print(data["json"]["success"])
+        else:
+            print(data["json"]["error"])
+            return
+
+        try:
+            notifs = data["json"]["notifications"]
+        except:
+            print("Could not find notifications")
+            return
 
         order = {}
 
         for x in notifs:
-            if x["subject"] == "MovementsUnits" and x["param_str"].find(command_type):
+            if x["subject"] == "MovementsUnits" and x["param_str"].find("cancelable_until") != -1:
                 order = json.loads(x["param_str"])["MovementsUnits"]
                 break
 
@@ -51,18 +61,27 @@ class TimeBot():
         arrival_at = order["arrival_at"]
         command_id = order["command_id"]
 
+        print(arrival_at, command_id)
+
         return arrival_at, command_id
 
     def cancel_command(self, id_to_cancel, source_town_id):
-        print("Cancelling")
+        print(f"Cancelling command: {id_to_cancel}")
         url = f"https://{self.world}.grepolis.com/game/town_overviews?town_id={source_town_id}&action=cancel_command&h={self.h_token}"
         data = {"json": '{"id\":"%s\","town_id":%s}' %
                 (id_to_cancel, source_town_id)}
 
-        requests.post(url, headers=self.headers,
-                      cookies=self.cookies, data=data)
+        r = requests.post(url, headers=self.headers,
+                          cookies=self.cookies, data=data)
+
+        if r.json()["json"].get("success") is not None:
+            print(r.json()["json"]["success"])
+        else:
+            print("Something went wrong cancelling command")
+            print(r.json()["json"]["error"])
 
     def calculate_difference(self, arrival_tijd, gewenste_arival, command_id, source_town_id, max_difference):
+        print(f"Command ID: {command_id}")
         difference = gewenste_arival - arrival_tijd
         print(
             f"[{difference}s] - Arrival: {epoch_to_time(arrival_tijd)} - desired arrival: {epoch_to_time(gewenste_arival)}")
@@ -70,9 +89,9 @@ class TimeBot():
         if difference <= max_difference and difference >= 0:
             return True
 
-        elif difference <= -20:
+        elif difference <= -20:  # This means it's impossible to get there on time
             self.cancel_command(command_id, source_town_id)
-            return False
+            return True
 
         else:
             self.cancel_command(command_id, source_town_id)
@@ -92,18 +111,18 @@ class TimeBot():
             try:
                 arrival_at, command_id = self.process_send_units_response(
                     response_data)
-            except KeyError:
-                print("Units aren't back yet - sleep 0.1 sec")
-                time.sleep(0.1)
+                gewenste_arival = time_to_epoch(hour, minute, second)
+                print(f"Desired Arrival: {epoch_to_time(gewenste_arival)}")
+                arrival_at = int(arrival_at)
+                resp_calc = self.calculate_difference(
+                    arrival_at, gewenste_arival, command_id, source_id, max_difference)
+                i += 1
+            except Exception as e:
+                print(e)
+                time.sleep(0.3)
                 continue
-            gewenste_arival = time_to_epoch(hour, minute, second)
-            print(f"Desired Arrival: {epoch_to_time(gewenste_arival)}")
-            arrival_at = int(arrival_at)
-            resp_calc = self.calculate_difference(
-                arrival_at, gewenste_arival, command_id, source_id, max_difference)
-            i += 1
 
-            if resp_calc == True or resp_calc == False:  # ! huh wtf is dit
+            if resp_calc:
                 break
 
     def generate_units_str_to_send(self, units_dict, units_list: list = [], percentage=100):
@@ -138,11 +157,19 @@ class TimeBot():
         print(units)
 
         # Generating units to send, give a list of units you want to send, in my case i only want to send slingers
-        units_to_send = self.generate_units_str_to_send(units, ["slinger"])
+        units_to_send = self.generate_units_str_to_send(
+            units, ["sword"], percentage=100)  # Percentage 100 to send all units
+
+        if units_to_send == "":
+            print("You don't have any units to send")
+            return
 
         # support/attack                    #City to attack, #hour, minute, second desired arrival
-        self.time_bot("support", city_1._id, 11368, 16, 21,
-                      40, units_to_send, max_difference=1)
+        self.time_bot("support", city_1._id, 11368, 23, 49,
+                      20, units_to_send, max_difference=1)
+
+        # above in a thread
+
         # Set max difference to 0 if you want to only send units when they arrive at the exact time, otherwise it will cancel the command and try again
         # Understand that the lower the max difference, the more likely your units will never be sent
         # a max_difference of 3 should be successful 90% of the time

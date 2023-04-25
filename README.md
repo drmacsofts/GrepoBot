@@ -71,6 +71,8 @@ To get a local copy up and running follow these simple steps.
 5. In the request headers, you will find the CSRF_TOKEN (sid) and H_TOKEN (h_token).
 6. Paste these in your .env file.
 
+Warning: These tokens change everytime you log out and log back in so you'll have to change these quite often.
+
 <!-- USAGE EXAMPLES -->
 
 ## Usage

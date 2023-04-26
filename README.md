@@ -97,7 +97,7 @@ python main.py
 
 ## **GrepoBot.py**
 By default this will:
-- Farm all villages of all cities and wait between 600 and 650 cities before starting the next cycle.
+- Farm all villages of all cities and wait between 600 and 650 seconds before starting the next cycle.
 - Check for possible buildings to upgrade and upgrade them if possible
 - Constantly checks the market to see if it's possible to exchange resources for gold. After 3 times you'll have to manually fill in a captcha. The bot will automatically send a message to a discord Webhook to alert the user when a captcha is required.
 - Constantly checks the commands to see if we're getting attacked. If we're getting attacked, it will send a message to a discord Webhook to alert the user. Also possible to automatically dodge an attack (but disabled by default)

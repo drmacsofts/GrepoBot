@@ -40,6 +40,9 @@ To get a local copy up and running follow these simple steps.
 - You need the Administrator in Grepolis ! (You can easily get the gold to buy him using the goldbot)
 
 ### Installation
+Youtube tutorial: 
+[GrepoBot setup](https://www.youtube.com/watch?v=oVjMQ8C0VtY)
+
 
 1. Clone the repo
    ```sh
@@ -119,10 +122,7 @@ I was able to farm around 500-1000 gold a day using this bot on a single world. 
 ![GoldBot Alert](./images/example_goldbot.jpg)
 
 
-## Contact
-I'll help the first few people that ran into any issues or have any questions out. Like I said, I stopped playing grepolis a couple months ago so I won't be updating this bot anymore.
 
-Contact me on discord: **jarno#8725**
 
 
 

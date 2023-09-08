@@ -41,7 +41,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Installation
 Youtube tutorial: 
-[GrepoBot setup](https://www.youtube.com/watch?v=oVjMQ8C0VtY)
+[GrepoBot setup](https://youtu.be/M7H9bKHJz8E)
 
 
 1. Clone the repo
